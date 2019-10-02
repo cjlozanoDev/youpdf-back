@@ -1,9 +1,18 @@
 import express from 'express';
+import multer from 'multer';
+import hummus from 'hummus';
+
 const api = express.Router();
+const upload  = multer({ storage: multer.memoryStorage() });
 
 /* GET home page. */
-api.get('/', function(req, res, next) {
-  res.status(200).send({message: 'Estás dentrooo!'})
+api.post('/dividirPdf', upload.single('filePDF'), (req, res, next) => {
+  const buffer64 = Buffer.from(req.file.buffer);
+  const pdfFile = new hummus.PDFRStreamForBuffer(buffer64);
+  const pdfWriter = hummus.createWriter(new hummus.PDFStreamForResponse(res));
+  pdfWriter.appendPDFPagesFromPDF(pdfFile, {type: hummus.eRangeTypeSpecific, specificRanges: [ [ 0, 1] ]});
+  pdfWriter.end();
+  res.status(200).end();
 });
 
 module.exports = api;
