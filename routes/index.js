@@ -3,7 +3,8 @@ import multer from 'multer';
 import hummus from 'hummus';
 
 const api = express.Router();
-const upload  = multer({ storage: multer.memoryStorage() });
+const upload  = multer({ storage: multer.memoryStorage()});
+const uploadArray = multer({ storage: multer.memoryStorage()}).array('files');
 
 /* GET home page. */
 api.post('/dividirPdf', upload.single('filePDF'), (req, res, next) => {
@@ -16,6 +17,22 @@ api.post('/dividirPdf', upload.single('filePDF'), (req, res, next) => {
   pdfWriter.appendPDFPagesFromPDF(pdfFile, {type: hummus.eRangeTypeSpecific, specificRanges: [ [ desde, hasta] ]});
   pdfWriter.end();
   res.status(200).end();
+});
+
+api.post('/unirPdf', (req, res, next) => {
+  let archivos = [];
+  uploadArray(req, res, err => {
+    if (err) {
+      res.status(400).send({
+        message: 'error',
+        error: err
+      })
+    } else {
+      archivos = req.files;
+      console.log(archivos);
+      res.status(200).end();
+    }
+  })
 });
 
 module.exports = api;
