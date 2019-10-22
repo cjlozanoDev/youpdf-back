@@ -29,7 +29,16 @@ api.post('/unirPdf', (req, res, next) => {
       })
     } else {
       archivos = req.files;
-      console.log(archivos);
+      const pdfWriter = hummus.createWriter(new hummus.PDFStreamForResponse(res));
+      let pdfFile = '';
+      let buffer64 = '';
+      for (let i = 0 ; i < archivos.length; i += 1) {
+        buffer64 = Buffer.from(archivos[i].buffer);
+        pdfFile = new hummus.PDFRStreamForBuffer(buffer64);
+        console.log(pdfFile);
+        pdfWriter.appendPDFPagesFromPDF(pdfFile); 
+      }
+      pdfWriter.end();
       res.status(200).end();
     }
   })
